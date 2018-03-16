@@ -1,20 +1,23 @@
-from idaapi import *
-from idautils import *
-from idc import *
+import idaapi
+import idc
+import struct
 
 
-b_addr = 0x003021AA
+def get_filename():
+    return idaapi.get_root_filename()
 
-LoadDebugger("windbg", 1)
 
-add_bpt(b_addr,0,BPT_SOFT)
-enable_bpt(b_addr,True)
+bin = ""
 
-StartDebugger("","","")
+filename = "dump_%s_.bin" % (get_filename())
+file = open(filename,"wb")
 
-GetDebuggerEvent(WFNE_SUSP, -1)
-addr = GetRegValue("ESI")
-print "ESI : ",hex(addr)
-print GetString(addr,-1,0)
- 
-continue_process()
+for ea in range(0x,0x,4):
+    bin += struct.pack("<L", idc.Dword(ea))
+
+file.write(bin)
+
+file.close()
+
+
+print "dump finish"
